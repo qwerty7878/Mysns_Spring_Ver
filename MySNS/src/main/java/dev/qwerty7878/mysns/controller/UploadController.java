@@ -1,5 +1,6 @@
 package dev.qwerty7878.mysns.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "Upload", description = "이미지 업로드")
 @RestController
 @RequestMapping("/v1/uploads")
 @RequiredArgsConstructor
@@ -46,9 +48,6 @@ public class UploadController {
 
             Files.createDirectories(path.getParent());
             file.transferTo(path.toFile());
-
-            // ✅ 파일 저장 위치 출력
-            System.out.println("이미지 저장 경로: " + path.toAbsolutePath());
 
             return ResponseEntity.ok(fileName);
         } catch (IOException e) {
