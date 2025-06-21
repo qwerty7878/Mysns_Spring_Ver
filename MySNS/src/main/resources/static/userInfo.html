@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="css/core.css">
+  <link rel="stylesheet" href="css/main.css">
+  <title>MySNS</title>
+  <style>
+    .pad-4 { padding: 0 4px; }
+    .pad-8 { padding: 0 8px; }
+    textarea {
+      float: left;
+      width: 100%;
+      height: 160px;
+      padding: 16px;
+      box-sizing: border-box;
+      font-size: 1.0em;
+      font-family: 'Malgun Gothic', 'Arial';
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      outline: none;
+    }
+    input[type=file] {
+      padding: 0px;
+      border: none;
+      outline: none;
+      font-size: 0.95em;
+    }
+    .desc {
+      float: left;
+      width: 100%;
+      margin-bottom: 5px;
+      font-size: 0.95em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+<div class="page-hdr">MySNS</div>
+<div class="page-body">
+  <div class="page-mnu">
+    <div class="menu" onclick="goHome()">홈</div>
+    <div class="menu" onclick="logout()">로그아웃</div>
+    <div class="menu" onclick="withdraw()">회원탈퇴</div>
+  </div>
+  <div class="section pad-24 mtop-30">
+    <div class="section pad-8 mbot-20">
+      아이디: <span id="id"></span>
+    </div>
+    <input id="name" type="text" class="mbot-10" placeholder="이름">
+    <textarea id="desc" placeholder="간단한 소개글을 작성해주세요. "></textarea>
+    <div class="section pad-4 mtop-30">
+      <div class="desc mbot-10">아래에서 이미지를 선택해주세요.</div>
+      <input type="file" id="image">
+    </div>
+    <input type="submit" class="mtop-30" value="수정하기" onclick="update()">
+  </div>
+</div>
+<div class="page-footer">Copyright: mysns.com</div>
+</body>
+
+<script>
+  let userObj = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("로그인이 필요합니다.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    fetch(`/v1/users/${userId}`)
+            .then(res => res.ok ? res.json() : Promise.reject("불러오기 실패"))
+            .then(user => {
+              userObj = user;
+              document.getElementById("id").textContent = user.id;
+              document.getElementById("name").value = user.name || "";
+              document.getElementById("desc").value = user.desc || "";
+            })
+            .catch(err => {
+              console.error(err);
+              alert("사용자 정보를 불러올 수 없습니다.");
+            });
+  });
+
+  function update() {
+    const name = document.getElementById("name").value.trim();
+    const desc = document.getElementById("desc").value.trim();
+    const image = document.getElementById("image").files[0];
+    const userId = userObj?.id;
+
+    if (!name) {
+      alert("이름을 입력해 주세요.");
+      document.getElementById("name").focus();
+      return;
+    }
+
+    const updatedUser = {
+      ...userObj,
+      name,
+      desc,
+      ts: getTime()
+    };
+
+    if (image) {
+      const formData = new FormData();
+      formData.append("file", image);
+
+      fetch("/v1/uploads/profile", {
+        method: "POST",
+        body: formData
+      })
+              .then(res => res.ok ? res.text() : Promise.reject("업로드 실패"))
+              .then(fileName => {
+                updatedUser.images = [fileName];
+                updateUserOnServer(userId, updatedUser);
+              })
+              .catch(err => alert("이미지 업로드 실패: " + err));
+    } else {
+      updateUserOnServer(userId, updatedUser);
+    }
+  }
+
+  function updateUserOnServer(userId, updatedUser) {
+    fetch(`/v1/users/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedUser)
+    })
+            .then(res => {
+              if (res.ok) {
+                alert("사용자 정보가 업데이트되었습니다.");
+                window.location.href = "main.html";
+              } else {
+                throw new Error("업데이트 실패");
+              }
+            })
+            .catch(err => alert("업데이트 중 오류: " + err));
+  }
+
+  function getTime() {
+    const date = new Date();
+    return date.toISOString();
+  }
+
+  function goHome() {
+    window.location.href = "main.html";
+  }
+
+  function logout() {
+    localStorage.removeItem("userId");
+    alert("로그아웃 되었습니다.");
+    window.location.href = "login.html";
+  }
+
+  function withdraw() {
+    window.location.href = "withdraw.html";
+  }
+</script>
+</html>

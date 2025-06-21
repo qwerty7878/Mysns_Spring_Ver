@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 - MySNS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="css/core.css">
+</head>
+<body>
+<div class="page-hdr">MySNS</div>
+<div class="page-body pad-24 mtop-30">
+    <h2>로그인</h2>
+
+    <input type="text" id="id" placeholder="아이디 (이메일주소)">
+    <input type="password" id="ps" class="mtop-10" placeholder="패스워드">
+
+    <input type="submit" class="mtop-20" value="로그인하기" onclick="login()">
+    <input type="button" class="mtop-10" value="회원가입 페이지로 이동" onclick="window.location.href='signup.html'">
+</div>
+</body>
+
+<script>
+    function login() {
+        const id = document.getElementById("id").value.trim();
+        const password = document.getElementById("ps").value.trim();
+
+        if (!id) {
+            alert("아이디를 입력해 주세요.");
+            document.getElementById("id").focus();
+            return;
+        }
+
+        if (!password) {
+            alert("패스워드를 입력해 주세요.");
+            document.getElementById("ps").focus();
+            return;
+        }
+
+        fetch("/v1/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, password })
+        })
+            .then(res => res.text())
+            .then(msg => {
+                if (msg.includes("성공")) {
+                    localStorage.setItem("userId", id);
+                    alert("로그인 성공!");
+                    window.location.href = "main.html";
+                } else {
+                    alert("로그인 실패: " + msg);
+                }
+            })
+            .catch(err => alert("서버 오류: " + err));
+    }
+</script>
+</html>

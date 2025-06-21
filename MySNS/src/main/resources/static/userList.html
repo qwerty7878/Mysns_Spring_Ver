@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>사용자 목록 - MySNS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="css/core.css">
+    <style>
+        .user-card {
+            padding: 12px;
+            margin: 12px;
+            background: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .user-card .id { font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="page-hdr">MySNS</div>
+<div class="page-body">
+    <div class="section pad-24">
+        <h2>전체 사용자</h2>
+        <div id="userList">불러오는 중...</div>
+    </div>
+</div>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch("/v1/users")
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(users => {
+                const list = document.getElementById("userList");
+                list.innerHTML = users.map(user => `
+        <div class="user-card">
+          <div class="id">ID: ${user.id}</div>
+          <div>이름: ${user.name || "-"}</div>
+          <div>가입일: ${new Date(user.createdAt).toLocaleString()}</div>
+        </div>
+      `).join("");
+            })
+            .catch(() => {
+                document.getElementById("userList").textContent = "사용자 목록을 불러오지 못했습니다.";
+            });
+    });
+</script>
+</html>

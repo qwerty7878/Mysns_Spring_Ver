@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="css/core.css">
+    <link rel="stylesheet" href="css/main.css">
+    <title>MySNS</title>
+</head>
+<body>
+<div class="page-hdr">MySNS</div>
+<div class="page-body">
+    <div class="page-mnu">
+        <div class="menu" onclick="addFeed()">글쓰기</div>
+        <div class="menu" onclick="showFriends()">친구보기</div>
+        <div class="menu" onclick="showUserInfo()">내정보</div>
+    </div>
+    <div id="list" class="section"></div>
+    <div class="section mtop-10 mbot-30 pad-16">
+        <div class="button" onclick="getNext()">작성글 더보기</div>
+    </div>
+</div>
+</body>
+
+<script>
+    const userId = localStorage.getItem("userId");
+    let feedList = [];
+    let minNo = -1;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        if (!userId) {
+            alert("로그인이 필요합니다.");
+            window.location.href = "login.html";
+            return;
+        }
+        loadFeeds();
+    });
+
+    async function loadFeeds() {
+        try {
+            const res = await fetch(`/v1/friends/${userId}`);
+            const friends = await res.json();
+            const ids = [userId, ...friends.map(f => f.id)];
+            const feedPromises = ids.map(id => fetch(`/v1/feeds/user/${id}`).then(r => r.json()));
+            const allFeeds = (await Promise.all(feedPromises)).flat().sort((a, b) => b.no - a.no);
+            feedList = allFeeds;
+            minNo = allFeeds.length ? allFeeds[allFeeds.length - 1].no : -1;
+            show(feedList);
+        } catch (err) {
+            console.error(err);
+            alert("피드 로딩 오류");
+        }
+    }
+
+    function getNext() {
+        const nextFeeds = feedList.filter(feed => feed.no < minNo).slice(0, 10);
+        if (!nextFeeds.length) return alert("더 이상 작성글이 없습니다.");
+        minNo = nextFeeds[nextFeeds.length - 1].no;
+        show(nextFeeds);
+    }
+
+    function show(feeds) {
+        const container = document.getElementById("list");
+        feeds.forEach(feed => container.insertAdjacentHTML("beforeend", getFeedCode(feed)));
+    }
+
+    function getFeedCode(feed) {
+        const name = feed.user?.name || feed.id;
+        let str = `<div class='feed' onclick='showFeed(${feed.no})'>`;
+        str += `<div class='author'>`;
+        if (feed.user?.images && feed.user.images.length > 0) {
+            const imgurl = "/images/" + feed.user.images[0];  // ✅ 절대 경로 수정
+            str += `<div class='photo' style='background-image: url("${imgurl}")'></div>`;
+        } else {
+            str += `<div class='photo'></div>`;
+        }
+        str += `<div class='name'>${name}</div></div>`;
+        if (feed.images && feed.images.length > 0) {
+            const imgurl = "/images/" + feed.images[0];  // ✅ 절대 경로 수정
+            str += `<div class='image' style='background-image: url("${imgurl}")'></div>`;
+        }
+        str += `<div class='text'>${feed.content}</div></div>`;
+        return str;
+    }
+
+    function showFeed(no) {
+        const feed = feedList.find(f => f.no === no);
+        if (!feed) return;
+        localStorage.setItem("selectedFeed", JSON.stringify(feed));
+        window.location.href = "feedView.html";
+    }
+
+    function addFeed() {
+        window.location.href = "feedAdd.html";
+    }
+
+    function showFriends() {
+        window.location.href = "friend.html";
+    }
+
+    function showUserInfo() {
+        window.location.href = "userInfo.html";
+    }
+</script>
+</html>

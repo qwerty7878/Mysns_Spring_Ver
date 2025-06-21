@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="css/core.css">
+  <title>MySNS</title>
+  <style>
+    .desc {
+      float: left;
+      width: 100%;
+      color: #888;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+<div class="page-hdr">MySNS</div>
+<div class="page-body">
+  <div class="section pad-24 mtop-30">
+    <input id="id" type="text" placeholder="아이디 (이메일주소)">
+    <input type="submit" class="mtop-20" value="회원탈퇴하기" onclick="withdraw()">
+  </div>
+  <div class="section pad-24 mtop-30">
+    <div class="desc mtop-20 mbot-20">
+      회원 탈퇴 시 회원 정보 및 활동 내역이 모두 삭제되며, 복원이 불가능하오니 유의하시기 바랍니다.
+    </div>
+  </div>
+</div>
+<div class="page-footer">Copyright: mysns.com, 202x</div>
+</body>
+
+<script>
+  function withdraw() {
+    const id = document.getElementById("id").value.trim();
+    if (!id) {
+      alert("아이디를 입력해 주세요.");
+      document.getElementById("id").focus();
+      return;
+    }
+
+    fetch(`/v1/users/${id}`, {
+      method: "DELETE"
+    })
+            .then(res => {
+              if (res.status === 404) {
+                alert("회원 정보를 찾을 수 없습니다.");
+              } else if (!res.ok) {
+                alert("회원 탈퇴 중 오류가 발생하였습니다.");
+              } else {
+                alert("회원 탈퇴가 완료되었습니다.");
+                localStorage.removeItem("userId");
+                window.location.href = "main.html";
+              }
+            })
+            .catch(err => {
+              alert("오류: " + err.message);
+            });
+  }
+</script>
+</html>
