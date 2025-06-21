@@ -42,6 +42,7 @@ public class UserServiceImpl implements UserService{
                 .map(user -> {
                     user.setName(updateUser.getName());
                     user.setPassword(updateUser.getPassword());
+                    user.setProfileImage(updateUser.getProfileImage());
                     return userRepository.save(user);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
