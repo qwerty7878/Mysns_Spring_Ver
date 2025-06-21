@@ -2,6 +2,7 @@ package dev.qwerty7878.mysns.controller;
 
 import dev.qwerty7878.mysns.entity.User;
 import dev.qwerty7878.mysns.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "User", description = "회원 CRUD")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/users")

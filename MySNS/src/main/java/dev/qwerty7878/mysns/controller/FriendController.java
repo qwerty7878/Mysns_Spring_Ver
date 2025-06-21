@@ -2,6 +2,7 @@ package dev.qwerty7878.mysns.controller;
 
 import dev.qwerty7878.mysns.entity.User;
 import dev.qwerty7878.mysns.service.FriendService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+@Tag(name = "Friend", description = "친구 추가 및 삭제, 조회")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/friends")

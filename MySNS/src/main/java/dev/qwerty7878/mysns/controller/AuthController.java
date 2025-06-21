@@ -3,6 +3,7 @@ package dev.qwerty7878.mysns.controller;
 import dev.qwerty7878.mysns.dto.LoginRequest;
 import dev.qwerty7878.mysns.entity.User;
 import dev.qwerty7878.mysns.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Auth", description = "로그인 및 회원가입")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/auth")
